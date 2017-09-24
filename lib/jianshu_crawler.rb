@@ -3,18 +3,20 @@ require 'wombat'
 require 'pry'
 require 'reverse_markdown'
 
-BASE_URL = "http://www.jianshu.com".freeze
+BASE_URL = "http://www.jianshu.com"
 
-USER_SUFFIX = "u/a8522ac98584?order_by=shared_at".freeze
+USER_SUFFIX = "u/a8522ac98584?order_by=shared_at"
 
-USER_URL = "#{BASE_URL}/#{USER_SUFFIX}".freeze
+USER_URL = "#{BASE_URL}/#{USER_SUFFIX}"
+
+LOADING_CHAR = "#"
 
 class JianShu
-  attr_reader :all_articles
+  attr_reader :articles_dict
 
   def initialize
     @link_list = []
-    @all_articles = []
+    @articles_dict = {}
     collected_link
     fetch_all_page
   end
@@ -23,10 +25,11 @@ class JianShu
     page = 1
 
     page += 1 until fetch_content(page).nil?
+    print "#{LOADING_CHAR}" * page +  "\nWe have #{page} Pages, and #{@link_list.size} Articles\n"
   end
 
   def fetch_content(page)
-    puts page
+    print "#{LOADING_CHAR}" * page + "\r"
     temp_class = Class.new do
       include Wombat::Crawler
       package_url = "#{USER_URL}&page=#{page}"
@@ -52,14 +55,13 @@ class JianShu
     end
   end
 
-  def format_article
-    @all_articles.map! { |article|
-      article[:body] = ReverseMarkdown.convert(article[:body])
-      article
-    }
+  def format_article(article_body)
+    ReverseMarkdown.convert(article_body)
   end
 
   def fetch_all_page
+    @finished_articles = 0
+    
     @link_list.each { |link|
       # 封装文章的链接
       article_link = "#{BASE_URL}#{link}"
@@ -75,15 +77,22 @@ class JianShu
       article_crawler.crawl
       context = article_crawler.instance_variable_get('@context')
 
+      category = context.css("div.show-foot .notebook span").text
+
       article = {
         title: context.css("h1.title").text,
-        body: context.css("div.article div.show-content").to_html,
-        category: context.css("div.show-foot .notebook span").text,
+        body: format_article(context.css("div.article div.show-content").to_html),
         time: context.css("div.info span.publish-time").text.gsub('*', '')
       }
-      @all_articles.push(article)
+
+      @articles_dict[category].nil? ? @articles_dict[category] = [article] : @articles_dict[category] << article
+
+      @finished_articles += 1
+      persentage = (@finished_articles.to_f / @link_list.size) * 100
+
+      print "Fetching #{persentage.round(2)}% \r"
     }
 
-    format_article
+    puts "Fetched #{@link_list.size} articles"
   end
 end
