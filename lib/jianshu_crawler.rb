@@ -1,6 +1,5 @@
 # coding: utf-8
 require 'wombat'
-require 'pry'
 require 'reverse_markdown'
 require 'colorator'
 require_relative './progressing'
@@ -65,7 +64,7 @@ class JianShu
 
   def fetch_all_page
     @finished_articles = 0
-    
+
     @link_list.each { |link|
       # 封装文章的链接
       article_link = "#{BASE_URL}#{link}"

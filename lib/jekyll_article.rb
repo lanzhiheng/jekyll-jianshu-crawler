@@ -1,6 +1,5 @@
 # coding: utf-8
 require 'tilt'
-require 'pry'
 require_relative './jianshu_crawler'
 
 
@@ -19,7 +18,7 @@ class JekyllArticle
   end
 
   def generate_file
-    puts "Ready to generate files"
+    puts "Ready to generate files:"
 
     current_path = File.dirname(__FILE__)
     # location for articles
@@ -33,7 +32,7 @@ class JekyllArticle
 
       category_articles.each do |article|
         begin
-          content = template.render(self, 
+          content = template.render(self,
                                     :title => article[:title],
                                     :body => article[:body],
                                     :time => article[:time]
@@ -46,6 +45,8 @@ class JekyllArticle
         end
       end
     end
+
+    puts "Files existed in ./article directory."
   end
 end
 
