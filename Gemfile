@@ -4,3 +4,4 @@ source 'https://rubygems.org'
 gem "wombat"
 gem "reverse_markdown"
 gem "tilt"
+gem "rspec"

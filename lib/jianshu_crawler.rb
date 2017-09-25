@@ -2,6 +2,8 @@
 require 'wombat'
 require 'pry'
 require 'reverse_markdown'
+require 'colorator'
+require_relative './progressing'
 
 BASE_URL = "http://www.jianshu.com"
 
@@ -12,6 +14,8 @@ USER_URL = "#{BASE_URL}/#{USER_SUFFIX}"
 LOADING_CHAR = "#"
 
 class JianShu
+  include Custom::Progressing
+
   attr_reader :articles_dict
 
   def initialize
@@ -23,13 +27,13 @@ class JianShu
 
   def collected_link
     page = 1
+    puts "Fetching some information of the website"
 
     page += 1 until fetch_content(page).nil?
-    print "#{LOADING_CHAR}" * page +  "\nWe have #{page} Pages, and #{@link_list.size} Articles\n"
+    puts "We have #{page.to_s.green} Pages, and #{@link_list.size.to_s.green} Articles"
   end
 
   def fetch_content(page)
-    print "#{LOADING_CHAR}" * page + "\r"
     temp_class = Class.new do
       include Wombat::Crawler
       package_url = "#{USER_URL}&page=#{page}"
@@ -88,11 +92,18 @@ class JianShu
       @articles_dict[category].nil? ? @articles_dict[category] = [article] : @articles_dict[category] << article
 
       @finished_articles += 1
-      persentage = (@finished_articles.to_f / @link_list.size) * 100
+      percentage = (@finished_articles.to_f / @link_list.size) * 100
 
-      print "Fetching #{persentage.round(2)}% \r"
+      print "Downloading #{format_terminal_progressing(percentage)} #{percentage.round}%\r".red
+      $stdout.flush
     }
 
-    puts "Fetched #{@link_list.size} articles"
+    puts "finished #{format_terminal_progressing(100)} #{100}%      ".green
+    puts "Download #{@link_list.size.to_s.green} articles"
   end
+end
+
+
+if __FILE__ == $0
+  JianShu.new
 end

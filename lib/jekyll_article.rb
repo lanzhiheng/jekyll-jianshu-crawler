@@ -19,6 +19,8 @@ class JekyllArticle
   end
 
   def generate_file
+    puts "Ready to generate files"
+
     current_path = File.dirname(__FILE__)
     # location for articles
     target_path = File.join('.', 'article')
