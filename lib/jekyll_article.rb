@@ -2,15 +2,14 @@
 require 'tilt'
 require_relative './jianshu_crawler'
 
-
 class JekyllArticle
   def initialize
     @jianshu = JianShu.new
   end
 
   def package_file_name(article)
-    title = article[:title]
-    time = article[:time]
+    title = article.title
+    time = article.time
     formated_title = title.gsub(/[ ，{},.《》''?？]/, '')
     formated_time = Date.strptime(time, '%Y.%m.%d').to_s
 
@@ -33,9 +32,9 @@ class JekyllArticle
       category_articles.each do |article|
         begin
           content = template.render(self,
-                                    :title => article[:title],
-                                    :body => article[:body],
-                                    :time => article[:time]
+                                    :title => article.title,
+                                    :body => article.body,
+                                    :time => article.time
                                    )
           f = File.new(File.join(category_path, package_file_name(article)), "w")
           f.write(content)

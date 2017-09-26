@@ -12,6 +12,9 @@ USER_URL = "#{BASE_URL}/#{USER_SUFFIX}"
 
 LOADING_CHAR = "#"
 
+# use Class replace Hash, we have getter and setter
+Article = Struct.new(:title, :body, :time)
+
 class JianShu
   include Custom::Progressing
 
@@ -82,11 +85,12 @@ class JianShu
 
       category = context.css("div.show-foot .notebook span").text
 
-      article = {
-        title: context.css("h1.title").text,
-        body: format_article(context.css("div.article div.show-content").to_html),
-        time: context.css("div.info span.publish-time").text.gsub('*', '')
-      }
+      # Article attribute
+      title = context.css("h1.title").text
+      body = format_article(context.css("div.article div.show-content").to_html)
+      time = context.css("div.info span.publish-time").text.gsub('*', '')
+
+      article = Article.new(title, body, time)
 
       @articles_dict[category].nil? ? @articles_dict[category] = [article] : @articles_dict[category] << article
 
