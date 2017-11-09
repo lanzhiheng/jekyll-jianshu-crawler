@@ -22,6 +22,7 @@ class JekyllArticle
     current_path = File.dirname(__FILE__)
     # location for articles
     target_path = File.join('.', 'article')
+
     Dir.mkdir(target_path)
 
     template = Tilt.new(File.join(current_path, 'site_template.erb'))

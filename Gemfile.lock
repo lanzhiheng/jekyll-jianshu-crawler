@@ -34,6 +34,7 @@ GEM
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
     ntlm-http (0.1.1)
+    rake (12.2.1)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
@@ -71,13 +72,11 @@ PLATFORMS
 
 DEPENDENCIES
   colorator
+  rake
   reverse_markdown
   rspec
   tilt
   wombat
-
-RUBY VERSION
-   ruby 2.4.1p111
 
 BUNDLED WITH
    1.15.4
