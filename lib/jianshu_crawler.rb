@@ -36,13 +36,13 @@ class JianShu
   end
 
   def fetch_content(page)
-    TempJianshuCrawler = Class.new do
+    jianshu_crawler_class = Class.new do
       include Wombat::Crawler
       package_url = "#{USER_URL}&page=#{page}"
       base_url package_url
     end
 
-    jianshu = TempJianshuCrawler.new
+    jianshu = jianshu_crawler_class.new
 
     mechanize_object = jianshu.instance_variable_get('@mechanize')
 
@@ -72,13 +72,13 @@ class JianShu
       # 封装文章的链接
       article_link = "#{BASE_URL}#{link}"
 
-      TempArticleCrawler = Class.new do
+      article_crawler_class = Class.new do
         include Wombat::Crawler
         package_url = article_link
         base_url package_url
       end
 
-      article_crawler = TempArticleCrawler.new
+      article_crawler = article_crawler_class.new
 
       article_crawler.crawl
       context = article_crawler.instance_variable_get('@context')

@@ -21,9 +21,17 @@ class JekyllArticle
 
     current_path = File.dirname(__FILE__)
     # location for articles
-    target_path = File.join('.', 'article')
+    article_dir = ENV['ARTICLE_DIR'] || 'article'
+    target_path = File.join('.', article_dir)
 
-    Dir.mkdir(target_path)
+    begin
+      Dir.mkdir(target_path)
+    rescue Errno::EEXIST => e
+      # If exists
+      require "fileutils"
+      FileUtils.rm_rf(target_path)
+      retry
+    end
 
     template = Tilt.new(File.join(current_path, 'site_template.erb'))
     @jianshu.articles_dict.each do |category, category_articles|
@@ -46,8 +54,6 @@ class JekyllArticle
       end
     end
 
-    puts "Files existed in ./article directory."
+    puts "Files existed in #{article_dir} directory."
   end
 end
-
-JekyllArticle.new.generate_file

@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# dot env file
+gem "dotenv"
+
 # run rake task
 gem "rake"
 
