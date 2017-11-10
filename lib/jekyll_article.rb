@@ -4,7 +4,7 @@ require_relative './jianshu_crawler'
 
 class JekyllArticle
   def initialize
-    @jianshu = JianShu.new
+    @jianshu_crawler = JianShuCrawler.new
   end
 
   def package_file_name(article)
@@ -34,7 +34,7 @@ class JekyllArticle
     end
 
     template = Tilt.new(File.join(current_path, 'site_template.erb'))
-    @jianshu.articles_dict.each do |category, category_articles|
+    @jianshu_crawler.articles_dict.each do |category, category_articles|
       category_path = File.join(target_path, category)
       Dir.mkdir(category_path)
 
