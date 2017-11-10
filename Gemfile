@@ -12,5 +12,3 @@ gem "reverse_markdown"
 gem "tilt"
 gem "rspec"
 gem "colorator"
-
-

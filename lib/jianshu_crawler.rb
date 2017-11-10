@@ -4,18 +4,30 @@ require 'reverse_markdown'
 require 'colorator'
 require_relative './progressing'
 
-BASE_URL = "http://www.jianshu.com"
+BASE_URL = ENV["JIANSHU_URL"]
 
-USER_SUFFIX = "u/a8522ac98584?order_by=shared_at"
+USER_SUFFIX = "u/#{ENV["JIANSHU_USER"]}?order_by=shared_at"
 
 USER_URL = "#{BASE_URL}/#{USER_SUFFIX}"
 
 LOADING_CHAR = "#"
 
 # use Class replace Hash, we have getter and setter
-Article = Struct.new(:title, :body, :time)
+class Article
+  attr_accessor :title, :body, :time
 
-class JianShu
+  def initialize(title, body, time)
+    self.title = title
+    self.body = format_article(body)
+    self.time = time
+  end
+
+  def format_article(article_body)
+    ReverseMarkdown.convert(article_body, unknow_tags: :raise, github_flavored: true)
+  end
+end
+
+class JianShuCrawler
   include Custom::Progressing
 
   attr_reader :articles_dict
@@ -61,8 +73,19 @@ class JianShu
     end
   end
 
-  def format_article(article_body)
-    ReverseMarkdown.convert(article_body, unknow_tags: :raise, github_flavored: true)
+  def package_article(context)
+    # Article attribute
+    title = context.css("h1.title").text
+    # html format
+    body = context.css("div.article div.show-content").to_html
+    time = context.css("div.info span.publish-time").text.gsub('*', '')
+    Article.new(title, body, time)
+  end
+
+  def add_article(context)
+    category = context.css("div.show-foot .notebook span").text
+    article = package_article(context)
+    @articles_dict[category].nil? ? @articles_dict[category] = [article] : @articles_dict[category] << article
   end
 
   def fetch_all_page
@@ -83,16 +106,7 @@ class JianShu
       article_crawler.crawl
       context = article_crawler.instance_variable_get('@context')
 
-      category = context.css("div.show-foot .notebook span").text
-
-      # Article attribute
-      title = context.css("h1.title").text
-      body = format_article(context.css("div.article div.show-content").to_html)
-      time = context.css("div.info span.publish-time").text.gsub('*', '')
-
-      article = Article.new(title, body, time)
-
-      @articles_dict[category].nil? ? @articles_dict[category] = [article] : @articles_dict[category] << article
+      add_article(context)
 
       @finished_articles += 1
       percentage = (@finished_articles.to_f / @link_list.size) * 100
@@ -104,9 +118,4 @@ class JianShu
     puts "finished #{format_terminal_progressing(100)} #{100}%      ".green
     puts "Download #{@link_list.size.to_s.green} articles"
   end
-end
-
-
-if __FILE__ == $0
-  JianShu.new
 end
